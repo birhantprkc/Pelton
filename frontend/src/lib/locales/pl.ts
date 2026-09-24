@@ -257,6 +257,8 @@ const pl: Record<string, string> = {
   'liability.continueTitle': 'Zanim przejdziesz dalej',
   'liability.body': 'Pelton łączy się z Twoimi prawdziwymi skrzynkami. Usunięcie może być nieodwracalne, a Pelton nie jest narzędziem do kopii zapasowych. Samodzielnie twórz kopie wszystkiego, czego nie możesz stracić.',
   'liability.warranty': 'Pelton to wolne oprogramowanie na licencji GPL-3.0, udostępniane bez gwarancji, a korzystasz z niego na własne ryzyko.',
+  'liability.limits': 'Odpowiedzialność jest ograniczona warunkiem dodatkowym, na który zezwala art. 7 lit. a GPL-3.0. Za winę umyślną, rażące niedbalstwo oraz naruszenie życia, ciała lub zdrowia odpowiadamy bez ograniczeń, a bezwzględnie obowiązujące prawa konsumenta pozostają nienaruszone.',
+  'liability.development': 'Pelton jest aktywnie rozwijany, więc funkcje i formaty danych mogą się zmieniać między wersjami. Zastosowanie ma prawo niemieckie.',
   'liability.link': 'Gwarancja i odpowiedzialność',
   'liability.accept': 'Przeczytałem to i rozumiem.',
   'liability.continue': 'Kontynuuj',

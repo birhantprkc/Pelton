@@ -257,6 +257,8 @@ const tr: Record<string, string> = {
   'liability.continueTitle': 'Devam etmeden önce',
   'liability.body': 'Pelton gerçek posta kutularınıza bağlanır. Silme işlemleri kalıcı olabilir ve Pelton bir yedekleme aracı değildir. Kaybetmeyi göze alamayacağınız her şeyin kendi yedeğini tutun.',
   'liability.warranty': 'Pelton, GPL-3.0 kapsamında özgür bir yazılımdır, garantisiz sunulur ve kullanımı sizin sorumluluğunuzdadır.',
+  'liability.limits': 'Sorumluluk, GPL-3.0\'ın 7 (a) maddesinin izin verdiği ek bir koşulla sınırlandırılmıştır. Kast, ağır ihmal ve yaşam, vücut bütünlüğü veya sağlığın ihlali hâlinde sorumluluk sınırsız kalır ve emredici tüketici haklarınız etkilenmez.',
+  'liability.development': 'Pelton etkin biçimde geliştirilmektedir; özellikler ve veri biçimleri sürümler arasında değişebilir. Alman hukuku uygulanır.',
   'liability.link': 'Garanti ve sorumluluk',
   'liability.accept': 'Bunu okudum ve anladım.',
   'liability.continue': 'Devam Et',

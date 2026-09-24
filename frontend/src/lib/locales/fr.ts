@@ -257,6 +257,8 @@ const fr: Record<string, string> = {
   'liability.continueTitle': 'Avant de continuer',
   'liability.body': 'Pelton se connecte à vos véritables boîtes aux lettres. Les suppressions peuvent être définitives, et Pelton n\'est pas un outil de sauvegarde. Conservez votre propre sauvegarde de ce que vous ne pouvez pas perdre.',
   'liability.warranty': 'Pelton est un logiciel libre sous GPL-3.0, fourni sans garantie, et vous l\'utilisez à vos propres risques.',
+  'liability.limits': 'La responsabilité est limitée par une condition supplémentaire que l\'article 7 a) de la GPL-3.0 autorise. La responsabilité pour faute intentionnelle, négligence grave et atteinte à la vie, à l\'intégrité physique ou à la santé reste illimitée, et vos droits impératifs de consommateur ne sont pas affectés.',
+  'liability.development': 'Pelton est en développement actif : les fonctionnalités et les formats de données peuvent changer d\'une version à l\'autre. Le droit allemand s\'applique.',
   'liability.link': 'Garantie et responsabilité',
   'liability.accept': 'J\'ai lu et compris ce texte.',
   'liability.continue': 'Continuer',

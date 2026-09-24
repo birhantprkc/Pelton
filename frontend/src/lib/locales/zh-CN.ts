@@ -264,6 +264,8 @@ const zhCN: Record<string, string> = {
   'liability.continueTitle': '继续之前',
   'liability.body': 'Pelton 会连接你真实的邮箱。删除操作可能无法恢复，Pelton 也不是备份工具。请对你无法承受丢失的内容自行做好备份。',
   'liability.warranty': 'Pelton 是遵循 GPL-3.0 的自由软件，不提供任何担保，使用风险由你自行承担。',
+  'liability.limits': '责任依据 GPL-3.0 第 7 条 (a) 项允许的附加条款予以限制。对故意、重大过失以及危及生命、身体或健康的情形，我们承担无限责任，你的强制性消费者权利不受影响。',
+  'liability.development': 'Pelton 正在积极开发中，功能与数据格式可能在不同版本之间发生变化。适用德国法律。',
   'liability.link': '担保与责任',
   'liability.accept': '我已阅读并理解上述内容。',
   'liability.continue': '继续',

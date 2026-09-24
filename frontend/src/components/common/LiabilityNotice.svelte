@@ -14,6 +14,8 @@
 
 <p class="body">{$t('liability.body')}</p>
 <p class="body">{$t('liability.warranty')}</p>
+<p class="body">{$t('liability.limits')}</p>
+<p class="body">{$t('liability.development')}</p>
 
 <button type="button" class="terms" on:click={() => BrowserOpenURL(termsUrl())}>
   {$t('liability.link')}

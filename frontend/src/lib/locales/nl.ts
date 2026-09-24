@@ -257,6 +257,8 @@ const nl: Record<string, string> = {
   'liability.continueTitle': 'Voordat je verdergaat',
   'liability.body': 'Pelton maakt verbinding met je echte mailboxen. Verwijderen kan definitief zijn, en Pelton is geen back-uptool. Maak zelf een back-up van alles wat je niet kwijt mag raken.',
   'liability.warranty': 'Pelton is vrije software onder de GPL-3.0, wordt zonder garantie geleverd en je gebruikt het op eigen risico.',
+  'liability.limits': 'De aansprakelijkheid is beperkt door een aanvullende voorwaarde die artikel 7 a) van de GPL-3.0 toestaat. Voor opzet, grove nalatigheid en letsel aan leven, lichaam of gezondheid blijft de aansprakelijkheid onbeperkt, en je dwingende consumentenrechten blijven onaangetast.',
+  'liability.development': 'Pelton is in actieve ontwikkeling: functies en dataformaten kunnen tussen versies veranderen. Het Duitse recht is van toepassing.',
   'liability.link': 'Garantie en aansprakelijkheid',
   'liability.accept': 'Ik heb dit gelezen en begrepen.',
   'liability.continue': 'Doorgaan',

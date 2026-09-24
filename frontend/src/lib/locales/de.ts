@@ -257,6 +257,8 @@ const de: Record<string, string> = {
   'liability.continueTitle': 'Bevor du weitermachst',
   'liability.body': 'Pelton greift auf deine echten Postfächer zu. Löschvorgänge können endgültig sein, und Pelton ist kein Backup-Werkzeug. Sichere selbst, was du nicht verlieren darfst.',
   'liability.warranty': 'Pelton ist freie Software unter der GPL-3.0, die Bereitstellung erfolgt ohne Gewährleistung und die Nutzung auf eigene Gefahr.',
+  'liability.limits': 'Die Haftung ist durch eine Zusatzbedingung beschränkt, die § 7 lit. a GPL-3.0 erlaubt. Für Vorsatz, grobe Fahrlässigkeit und die Verletzung von Leben, Körper oder Gesundheit haften wir unbeschränkt, und zwingende Verbraucherrechte bleiben unberührt.',
+  'liability.development': 'Pelton wird aktiv entwickelt, Funktionen und Datenformate können sich zwischen Versionen ändern. Es gilt deutsches Recht.',
   'liability.link': 'Gewährleistung und Haftung',
   'liability.accept': 'Ich habe das gelesen und verstanden.',
   'liability.continue': 'Weiter',

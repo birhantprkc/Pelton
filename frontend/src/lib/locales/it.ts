@@ -257,6 +257,8 @@ const it: Record<string, string> = {
     'liability.continueTitle': 'Prima di continuare',
     'liability.body': 'Pelton si collega alle tue vere caselle di posta. Le eliminazioni possono essere permanenti e Pelton non è uno strumento di backup. Conserva una tua copia di backup di tutto ciò che non puoi permetterti di perdere.',
     'liability.warranty': 'Pelton è un software libero distribuito sotto licenza GPL-3.0, fornito senza garanzia, e viene utilizzato a proprio rischio e pericolo.',
+    'liability.limits': 'La responsabilità è limitata da una condizione aggiuntiva consentita dall\'articolo 7 a) della GPL-3.0. La responsabilità per dolo, colpa grave e lesioni alla vita, all\'integrità fisica o alla salute resta illimitata, e i tuoi diritti imperativi di consumatore non sono pregiudicati.',
+    'liability.development': 'Pelton è in sviluppo attivo, quindi funzionalità e formati dei dati possono cambiare tra una versione e l\'altra. Si applica il diritto tedesco.',
     'liability.link': 'Garanzia e responsabilità',
     'liability.accept': 'Ho letto e compreso quanto sopra.',
     'liability.continue': 'Continua',

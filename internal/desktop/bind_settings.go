@@ -116,8 +116,10 @@ const (
 	// show the browser hand over clickable chrome instead of the native arrow.
 	// hyperlinks keep the hand either way.
 	settingHandCursor = "hand_cursor"
-	// show the unread count on the dock icon (macOS only for now).
-	settingDockBadge = "dock_badge"
+	// show the unread count on the dock icon on macOS, or the unread dot on
+	// the tray icon on Windows and Linux. Stored under its original name, from
+	// when only the dock showed it, so nobody who turned it off gets it back.
+	settingUnreadBadge = "dock_badge"
 	// dark window bounds ("HH:MM") for the schedule theme mode.
 	settingThemeDarkStart = "theme_dark_start"
 	settingThemeDarkEnd   = "theme_dark_end"
@@ -361,8 +363,9 @@ type UIPrefsDTO struct {
 	// HandCursor shows the browser hand over clickable chrome instead of the
 	// native arrow.
 	HandCursor bool `json:"handCursor"`
-	// DockBadge shows the unread count on the dock icon.
-	DockBadge bool `json:"dockBadge"`
+	// UnreadBadge shows the unread count on the dock icon on macOS, or the unread
+	// dot on the tray icon on Windows and Linux.
+	UnreadBadge bool `json:"unreadBadge"`
 	// ThemeDarkStart/ThemeDarkEnd bound the dark window ("HH:MM") for the
 	// schedule theme mode.
 	ThemeDarkStart string `json:"themeDarkStart"`
@@ -481,7 +484,7 @@ func (a *App) GetUIPrefs() (UIPrefsDTO, error) {
 		TimeFormat:                 a.stringSetting(settingTimeFormat, "auto"),
 		ReduceMotion:               a.boolSetting(settingReduceMotion, false),
 		HandCursor:                 a.boolSetting(settingHandCursor, false),
-		DockBadge:                  a.boolSetting(settingDockBadge, true),
+		UnreadBadge:                a.boolSetting(settingUnreadBadge, true),
 		ThemeDarkStart:             a.stringSetting(settingThemeDarkStart, "19:00"),
 		ThemeDarkEnd:               a.stringSetting(settingThemeDarkEnd, "07:00"),
 		BodyFont:                   a.stringSetting(settingBodyFont, "default"),
@@ -539,8 +542,8 @@ func (a *App) SetSetting(key, value string) error {
 	if key == settingCharsetFallback {
 		a.applyCharsetFallback()
 	}
-	if key == settingDockBadge {
-		a.applyDockBadge()
+	if key == settingUnreadBadge || key == settingLanguage {
+		a.applyUnreadBadge()
 	}
 	if key == settingIndexDecrypted {
 		// rebuilt from scratch rather than re-indexed in place: switching this

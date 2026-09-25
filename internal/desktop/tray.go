@@ -2,6 +2,8 @@
 
 package desktop
 
+import "fmt"
+
 // The tray icon. With the background close action, closing the window leaves
 // Pelton syncing with no visible way to get it back or quit it; the tray icon
 // is that way. Left click reopens the window, right click shows the menu
@@ -34,4 +36,11 @@ func (a *App) trayMenuItems(show func()) []trayMenuItem {
 		{},
 		{label: s.quit, action: a.quitApp},
 	}
+}
+
+// trayUnreadText is the unread count as the tray tooltip shows it. Unlike the
+// menu, it follows the language setting as it changes, since it is rebuilt on
+// every count anyway.
+func trayUnreadText(a *App, count int) string {
+	return fmt.Sprintf(menuStringsFor(a.stringSetting(settingLanguage, "en")).trayUnread, count)
 }

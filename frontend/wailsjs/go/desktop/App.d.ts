@@ -326,8 +326,6 @@ export function SetAccountSignatures(arg1:number,arg2:number,arg3:number):Promis
 
 export function SetDefaultMailClient():Promise<void>;
 
-export function SetDockBadge(arg1:number):Promise<void>;
-
 export function SetFlagColor(arg1:number,arg2:number):Promise<void>;
 
 export function SetFlagged(arg1:number,arg2:boolean):Promise<void>;
@@ -353,6 +351,8 @@ export function SetSMIMERevocation(arg1:boolean):Promise<void>;
 export function SetSeen(arg1:number,arg2:boolean):Promise<void>;
 
 export function SetSetting(arg1:string,arg2:string):Promise<void>;
+
+export function SetUnreadBadge(arg1:number):Promise<void>;
 
 export function SetVirusTotalAPIKey(arg1:string):Promise<void>;
 

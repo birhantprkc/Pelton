@@ -1445,6 +1445,8 @@ const de: Record<string, string> = {
   'settingsPanel.hint.handCursor': 'Zeigt über Schaltflächen, Zeilen und Tabs den Handzeiger statt des normalen Pfeils. Links behalten die Hand immer.',
   'settingsPanel.toggle.dockBadge': 'Ungelesene im Dock-Symbol',
   'settingsPanel.hint.dockBadge': 'Zeigt am App-Symbol im Dock, wie viele ungelesene Nachrichten im Posteingang liegen.',
+  'settingsPanel.toggle.trayBadge': 'Punkt für Ungelesene im Infobereich',
+  'settingsPanel.hint.trayBadge': 'Markiert das Pelton-Symbol im Infobereich mit einem Punkt, solange ungelesene Nachrichten im Posteingang liegen. Beim Darüberfahren zeigt es die Anzahl.',
   'settingsPanel.theme.schedule': 'Zeitgesteuert',
   'settingsPanel.label.darkFrom': 'Dunkel ab',
   'settingsPanel.label.darkUntil': 'Bis',

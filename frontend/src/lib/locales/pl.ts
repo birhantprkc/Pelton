@@ -1398,6 +1398,8 @@ const pl: Record<string, string> = {
   'settingsPanel.hint.handCursor': 'Pokazuje kursor dłoni nad przyciskami, wierszami i kartami zamiast zwykłej strzałki. Odnośniki zawsze zachowują dłoń.',
   'settingsPanel.toggle.dockBadge': 'Liczba nieprzeczytanych na ikonie w Docku',
   'settingsPanel.hint.dockBadge': 'Pokazuje na ikonie aplikacji w Docku, ile nieprzeczytanych wiadomości jest w skrzynce odbiorczej.',
+  'settingsPanel.toggle.trayBadge': 'Kropka nieprzeczytanych na ikonie w zasobniku',
+  'settingsPanel.hint.trayBadge': 'Oznacza ikonę w zasobniku systemowym kropką, dopóki w skrzynce odbiorczej są nieprzeczytane wiadomości. Najedź na nią, aby zobaczyć ich liczbę.',
   'settingsPanel.theme.schedule': 'Zaplanowany',
   'settingsPanel.label.darkFrom': 'Ciemny od',
   'settingsPanel.label.darkUntil': 'Do',

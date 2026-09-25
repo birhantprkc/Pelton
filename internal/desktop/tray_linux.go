@@ -3,15 +3,13 @@
 package desktop
 
 import (
-	"bytes"
-	"encoding/binary"
-	"errors"
 	"fmt"
 	"image"
 	"image/color"
-	"image/png"
 	"os"
+	"slices"
 	"sync"
+	"sync/atomic"
 
 	"github.com/godbus/dbus/v5"
 	"github.com/godbus/dbus/v5/introspect"
@@ -49,13 +47,19 @@ const (
 	menuPath       = "/StatusNotifierMenu"
 )
 
-// tray is the running StatusNotifierItem, nil until startTray has one up.
-var tray *statusNotifier
+// tray is the running StatusNotifierItem, nil until startTray has one up. The
+// unread badge reaches it from whichever goroutine the frontend's call runs on.
+var tray atomic.Pointer[statusNotifier]
 
 // statusNotifier serves the org.kde.StatusNotifierItem object.
 type statusNotifier struct {
-	app  *App
-	conn *dbus.Conn
+	app   *App
+	conn  *dbus.Conn
+	props *prop.Properties
+	title string
+	// icon and dotted are the icon without and with the unread dot, drawn once
+	// at export so a changing count only swaps between them.
+	icon, dotted []sniPixmap
 	// token is the newest activation token the host provided and no action
 	// has spent. A token is single use and tied to the click that produced it,
 	// and the compositor invalidates it as soon as it issues the next one.
@@ -124,7 +128,9 @@ func (a *App) startTray() {
 		conn.Close()
 		return
 	}
-	tray = t
+	tray.Store(t)
+	// the frontend may have reported a count before the item was up.
+	a.applyUnreadBadge()
 
 	// hosts learn about items only through RegisterStatusNotifierItem, so a
 	// host that (re)appears has to be told again.
@@ -161,8 +167,16 @@ func (a *App) startTray() {
 // stopTray takes the item off the bus. The host drops it when the name goes
 // away. Safe to call even if the tray never came up.
 func (a *App) stopTray() {
-	if tray != nil {
-		tray.conn.Close()
+	if t := tray.Load(); t != nil {
+		t.conn.Close()
+	}
+}
+
+// setPlatformBadge shows the unread dot on the tray icon, with the count in
+// its tooltip. Zero clears both.
+func (a *App) setPlatformBadge(count int) {
+	if t := tray.Load(); t != nil {
+		t.setUnread(count)
 	}
 }
 
@@ -170,17 +184,21 @@ func (a *App) stopTray() {
 // per-process name hosts expect.
 func (t *statusNotifier) export() error {
 	a := t.app
-	title := "Pelton"
+	t.title = "Pelton"
 	id := "pelton"
 	if a.channel == storage.ChannelNightly {
-		title = "Pelton Nightly"
+		t.title = "Pelton Nightly"
 		id = "pelton-nightly"
 	}
-	pixmaps := []sniPixmap{}
+	t.icon, t.dotted = []sniPixmap{}, []sniPixmap{}
 	if len(a.trayIcon) > 0 {
-		var err error
-		if pixmaps, err = pixmapsFromICO(a.trayIcon); err != nil {
+		frames, err := iconFrames(a.trayIcon)
+		if err != nil {
 			return fmt.Errorf("decode icon: %w", err)
+		}
+		for _, f := range frames {
+			t.icon = append(t.icon, pixmapFromImage(f))
+			t.dotted = append(t.dotted, pixmapFromImage(withDot(f)))
 		}
 	}
 
@@ -189,27 +207,31 @@ func (t *statusNotifier) export() error {
 	}
 	// the whole spec property set, unused ones empty, so a host that reads
 	// properties one at a time never trips over a missing one.
-	_, err := prop.Export(t.conn, sniPath, map[string]map[string]*prop.Prop{sniInterface: {
+	// IconPixmap gets its own copy of the icon: prop stores every later value
+	// into the one it was given, copying a slice element by element when the
+	// lengths match, which would otherwise write the dotted icon over t.icon.
+	props, err := prop.Export(t.conn, sniPath, map[string]map[string]*prop.Prop{sniInterface: {
 		"Category":            {Value: "ApplicationStatus", Emit: prop.EmitTrue},
 		"Id":                  {Value: id, Emit: prop.EmitTrue},
-		"Title":               {Value: title, Emit: prop.EmitTrue},
+		"Title":               {Value: t.title, Emit: prop.EmitTrue},
 		"Status":              {Value: "Active", Emit: prop.EmitTrue},
 		"WindowId":            {Value: int32(0), Emit: prop.EmitTrue},
 		"IconName":            {Value: "", Emit: prop.EmitTrue},
-		"IconPixmap":          {Value: pixmaps, Emit: prop.EmitTrue},
+		"IconPixmap":          {Value: slices.Clone(t.icon), Emit: prop.EmitTrue},
 		"IconThemePath":       {Value: "", Emit: prop.EmitTrue},
 		"OverlayIconName":     {Value: "", Emit: prop.EmitTrue},
 		"OverlayIconPixmap":   {Value: []sniPixmap{}, Emit: prop.EmitTrue},
 		"AttentionIconName":   {Value: "", Emit: prop.EmitTrue},
 		"AttentionIconPixmap": {Value: []sniPixmap{}, Emit: prop.EmitTrue},
 		"AttentionMovieName":  {Value: "", Emit: prop.EmitTrue},
-		"ToolTip":             {Value: sniToolTip{Title: title, IconPixmaps: []sniPixmap{}}, Emit: prop.EmitTrue},
+		"ToolTip":             {Value: t.toolTip(0), Emit: prop.EmitTrue},
 		"ItemIsMenu":          {Value: false, Emit: prop.EmitTrue},
 		"Menu":                {Value: dbus.ObjectPath(menuPath), Emit: prop.EmitTrue},
 	}})
 	if err != nil {
 		return fmt.Errorf("export item properties: %w", err)
 	}
+	t.props = props
 	itemNode := introspect.Node{Name: sniPath, Interfaces: []introspect.Interface{
 		introspect.IntrospectData, prop.IntrospectData, sniIntrospection,
 	}}
@@ -251,6 +273,34 @@ func (t *statusNotifier) register() {
 	if call.Err != nil {
 		t.app.log.Error("tray icon: register with the tray host", "err", call.Err)
 	}
+}
+
+// setUnread swaps the icon for the dotted one and puts the count in the
+// tooltip. Hosts watch the item's own New* signals rather than
+// PropertiesChanged, and a host that registers later reads the properties
+// fresh, so nothing has to be replayed for it.
+func (t *statusNotifier) setUnread(count int) {
+	icon := t.icon
+	if count > 0 {
+		icon = t.dotted
+	}
+	t.props.SetMust(sniInterface, "IconPixmap", icon)
+	t.props.SetMust(sniInterface, "ToolTip", t.toolTip(count))
+	for _, signal := range []string{"NewIcon", "NewToolTip"} {
+		if err := t.conn.Emit(sniPath, sniInterface+"."+signal); err != nil {
+			t.app.log.Error("tray icon: signal the tray host", "signal", signal, "err", err)
+		}
+	}
+}
+
+// toolTip is the item's tooltip: its title, and under it the unread count
+// when there is one.
+func (t *statusNotifier) toolTip(count int) sniToolTip {
+	tip := sniToolTip{Title: t.title, IconPixmaps: []sniPixmap{}}
+	if count > 0 {
+		tip.Description = trayUnreadText(t.app, count)
+	}
+	return tip
 }
 
 // observe sees every incoming message in bus order, before godbus dispatches
@@ -414,46 +464,6 @@ func (m *trayMenu) AboutToShowGroup(ids []int32) ([]int32, []int32, *dbus.Error)
 	return []int32{}, []int32{}, nil
 }
 
-// pngMagic starts every png stream; an .ico frame is either that or a
-// headerless Windows bitmap.
-var pngMagic = []byte("\x89PNG\r\n\x1a\n")
-
-// pixmapsFromICO extracts the png frames of the embedded .ico, one pixmap per
-// size so the host can pick the one closest to its tray. The bitmap frames
-// old Windows versions need are skipped: decoding them is not worth the code
-// when both icons carry png frames as well.
-func pixmapsFromICO(data []byte) ([]sniPixmap, error) {
-	if len(data) < 6 || binary.LittleEndian.Uint16(data[2:]) != 1 {
-		return nil, errors.New("not an icon file")
-	}
-	count := int(binary.LittleEndian.Uint16(data[4:]))
-	var out []sniPixmap
-	for i := 0; i < count; i++ {
-		entry := 6 + i*16
-		if entry+16 > len(data) {
-			return nil, errors.New("truncated icon directory")
-		}
-		size := uint64(binary.LittleEndian.Uint32(data[entry+8:]))
-		offset := uint64(binary.LittleEndian.Uint32(data[entry+12:]))
-		if offset+size > uint64(len(data)) {
-			return nil, errors.New("icon frame outside the file")
-		}
-		frame := data[offset : offset+size]
-		if !bytes.HasPrefix(frame, pngMagic) {
-			continue
-		}
-		img, err := png.Decode(bytes.NewReader(frame))
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, pixmapFromImage(img))
-	}
-	if len(out) == 0 {
-		return nil, errors.New("no png frame in icon")
-	}
-	return out, nil
-}
-
 // pixmapFromImage converts one frame into the host's wire format: straight
 // (not premultiplied) alpha, one big-endian ARGB word per pixel.
 func pixmapFromImage(img image.Image) sniPixmap {
@@ -479,6 +489,10 @@ var (
 			{Name: "ContextMenu", Args: []introspect.Arg{{Name: "x", Type: "i", Direction: "in"}, {Name: "y", Type: "i", Direction: "in"}}},
 			{Name: "Scroll", Args: []introspect.Arg{{Name: "delta", Type: "i", Direction: "in"}, {Name: "orientation", Type: "s", Direction: "in"}}},
 			{Name: "ProvideXdgActivationToken", Args: []introspect.Arg{{Name: "token", Type: "s", Direction: "in"}}},
+		},
+		Signals: []introspect.Signal{
+			{Name: "NewIcon"},
+			{Name: "NewToolTip"},
 		},
 		Properties: []introspect.Property{
 			{Name: "Category", Type: "s", Access: "read"},

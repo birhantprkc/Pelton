@@ -79,7 +79,7 @@ const defaults: UIPrefs = {
   timeFormat: 'auto',
   reduceMotion: false,
   handCursor: false,
-  dockBadge: true,
+  unreadBadge: true,
   themeDarkStart: '19:00',
   themeDarkEnd: '07:00',
   bodyFont: 'default',
@@ -494,11 +494,11 @@ export function setHandCursor(value: boolean): void {
   void setSetting(SettingKeys.handCursor, String(value))
 }
 
-// setDockBadgeEnabled toggles the unread count on the dock icon. The backend
+// setUnreadBadgeEnabled toggles the unread badge on the dock or tray icon. The backend
 // re-applies or clears the badge itself when this setting lands.
-export function setDockBadgeEnabled(value: boolean): void {
-  prefs.update((p) => ({ ...p, dockBadge: value }))
-  void setSetting(SettingKeys.dockBadge, String(value))
+export function setUnreadBadgeEnabled(value: boolean): void {
+  prefs.update((p) => ({ ...p, unreadBadge: value }))
+  void setSetting(SettingKeys.unreadBadge, String(value))
 }
 
 // setUIFont / setMonoFont override the interface and monospace font tokens,

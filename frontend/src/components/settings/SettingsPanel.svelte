@@ -50,7 +50,7 @@
     setMessageFontSize,
     setToastPosition,
     setNotifyNewMail,
-    setDockBadgeEnabled,
+    setUnreadBadgeEnabled,
     setPaneLocked,
     setSendDelay,
     setFlagHighlight,
@@ -140,6 +140,11 @@
   ]
 
   const dispatch = createEventDispatcher<{ close: void; rerunOnboarding: void }>()
+
+  // the unread badge setting is a count on the dock tile on macOS and a dot on
+  // the tray icon on Windows and Linux, so its row is labelled for the one at hand.
+  const badgeToggleKey = isMac ? 'settingsPanel.toggle.dockBadge' : 'settingsPanel.toggle.trayBadge'
+  const badgeHintKey = isMac ? 'settingsPanel.hint.dockBadge' : 'settingsPanel.hint.trayBadge'
   $: currentLocale = $prefs.language
 
   // languageReload remounts the picker so newly dropped language files show
@@ -228,7 +233,7 @@
     { cat: 'signatures', label: $t('settingsPanel.category.signatures'), kw: 'signature footer' },
     { cat: 'notifications', label: $t('settings.toastPosition'), kw: 'notification position' },
     { cat: 'notifications', label: $t('vip.notifyNewMail'), kw: 'new mail notification' },
-    ...(isMac ? [{ cat: 'notifications', label: $t('settingsPanel.toggle.dockBadge'), kw: 'dock badge unread count icon' }] : []),
+    { cat: 'notifications', label: $t(badgeToggleKey), kw: isMac ? 'dock badge unread count icon' : 'tray badge dot unread count icon' },
     { cat: 'notifications', label: $t('vip.manageLabel'), kw: 'vip senders' },
     { cat: 'gestures', label: $t('settingsPanel.toggle.swipeEnabled'), kw: 'swipe gesture' },
     { cat: 'gestures', label: $t('settingsPanel.label.swipeLeft'), kw: 'swipe left' },
@@ -1370,19 +1375,15 @@
               on:change={(e) => setNotifyNewMail(e.detail)}
             />
           </div>
-          <!-- only macOS has a dock tile to badge, so the row would be a dead
-               switch on Windows and Linux. -->
-          {#if isMac}
-            <div class="toggle">
-              <span class="row-label">{$t('settingsPanel.toggle.dockBadge')}</span>
-              <ToggleSwitch
-                checked={$prefs.dockBadge}
-                label={$t('settingsPanel.toggle.dockBadge')}
-                on:change={(e) => setDockBadgeEnabled(e.detail)}
-              />
-            </div>
-            <p class="hint">{$t('settingsPanel.hint.dockBadge')}</p>
-          {/if}
+          <div class="toggle">
+            <span class="row-label">{$t(badgeToggleKey)}</span>
+            <ToggleSwitch
+              checked={$prefs.unreadBadge}
+              label={$t(badgeToggleKey)}
+              on:change={(e) => setUnreadBadgeEnabled(e.detail)}
+            />
+          </div>
+          <p class="hint">{$t(badgeHintKey)}</p>
           <div class="field">
             <span class="row-label">{$t('vip.manageLabel')}</span>
             <p class="hint">{$t('vip.manageHint')}</p>

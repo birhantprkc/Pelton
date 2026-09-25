@@ -160,7 +160,7 @@ type App struct {
 	mailto mailtoState
 
 	// badgeMu guards unreadBadge, the last unread count the frontend reported
-	// for the dock icon. Kept so toggling the setting can re-apply it without
+	// for the dock or tray icon. Kept so toggling the setting can re-apply it without
 	// waiting for the next sidebar refresh.
 	badgeMu     sync.Mutex
 	unreadBadge int

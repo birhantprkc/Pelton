@@ -8,6 +8,12 @@
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 LDFLAGS := -X main.version=$(VERSION)
 
+# wails links webkit2gtk-4.0 on Linux unless built with the webkit2_41 tag. most
+# current distros ship only 4.1, so build-linux and the dev targets add the tag
+# whenever pkg-config finds it. empty on macOS and Windows, where there is no
+# webkitgtk.
+WEBKIT_TAGS := $(shell pkg-config --exists webkit2gtk-4.1 2>/dev/null && echo -tags webkit2_41)
+
 # production build into build/bin
 build:
 	wails build -ldflags "$(LDFLAGS)"
@@ -46,7 +52,7 @@ build-win: disclaimer
 # is easy to install into ~/.local/share/applications (or a package). building
 # from macOS needs the gtk/webkit2gtk toolchain; run on Linux for a clean build.
 build-linux:
-	wails build -platform linux/amd64 -ldflags "$(LDFLAGS)"
+	wails build -platform linux/amd64 $(WEBKIT_TAGS) -ldflags "$(LDFLAGS)"
 	cp build/linux/pelton.desktop build/bin/pelton.desktop
 	@echo "linux binary + pelton.desktop in build/bin (install the .desktop and an icon named 'pelton')"
 
@@ -63,14 +69,14 @@ build-nix:
 # accounts, mail cache or settings.
 run: deps
 	wails generate module
-	PELTON_DEV=1 wails dev -ldflags "$(LDFLAGS)"
+	PELTON_DEV=1 wails dev $(WEBKIT_TAGS) -ldflags "$(LDFLAGS)"
 
 # run the app in the cosmetic demo mode (--potatoes-are-nice): the ui fills with
 # fixed potato-themed sample data for website screenshots and never touches real
 # accounts, mail or the network. Same dev setup as `run`, just with the flag.
 nice-potatoes: deps
 	wails generate module
-	PELTON_DEV=1 wails dev -appargs "--potatoes-are-nice" -ldflags "$(LDFLAGS)"
+	PELTON_DEV=1 wails dev $(WEBKIT_TAGS) -appargs "--potatoes-are-nice" -ldflags "$(LDFLAGS)"
 
 # run the app as a nightly build would behave: the launch warning dialog, the
 # status bar marker and the nightly name/icon in the about block. PELTON_DEV
@@ -78,7 +84,7 @@ nice-potatoes: deps
 # nightly one either.
 run-nightly: deps
 	wails generate module
-	PELTON_DEV=1 wails dev -ldflags "$(LDFLAGS) -X main.channel=nightly"
+	PELTON_DEV=1 wails dev $(WEBKIT_TAGS) -ldflags "$(LDFLAGS) -X main.channel=nightly"
 
 dev: run
 

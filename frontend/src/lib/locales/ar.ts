@@ -1445,6 +1445,8 @@ const ar: Record<string, string> = {
   'settingsPanel.hint.handCursor': 'إظهار مؤشر اليد فوق الأزرار والصفوف والتبويبات بدلاً من السهم العادي. تحتفظ الروابط باليد دائماً.',
   'settingsPanel.toggle.dockBadge': 'عدد غير المقروء على أيقونة الرصيف',
   'settingsPanel.hint.dockBadge': 'إظهار عدد الرسائل غير المقروءة في بريدك الوارد، على أيقونة التطبيق في الرصيف.',
+  'settingsPanel.toggle.trayBadge': 'نقطة غير المقروء على أيقونة علبة النظام',
+  'settingsPanel.hint.trayBadge': 'يضع نقطة على أيقونة علبة النظام ما دام في بريدك الوارد رسائل غير مقروءة. مرّر المؤشر فوقها لمعرفة عددها.',
   'settingsPanel.theme.schedule': 'مجدول',
   'settingsPanel.label.darkFrom': 'داكن من',
   'settingsPanel.label.darkUntil': 'حتى',

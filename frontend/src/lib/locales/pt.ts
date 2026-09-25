@@ -1439,6 +1439,8 @@ const pt: Record<string, string> = {
   'settingsPanel.hint.handCursor': 'Mostra o ponteiro de mão sobre botões, linhas e separadores em vez da seta normal. Ligações sempre mantêm a mão.',
   'settingsPanel.toggle.dockBadge': 'Contagem de não lidas no ícone da dock',
   'settingsPanel.hint.dockBadge': 'Mostra quantas mensagens não lidas a sua caixa de entrada tem, no ícone da aplicação na dock.',
+  'settingsPanel.toggle.trayBadge': 'Ponto de não lidas no ícone da área de notificação',
+  'settingsPanel.hint.trayBadge': 'Marca o ícone da área de notificação com um ponto enquanto a sua caixa de entrada tiver mensagens não lidas. Passe o cursor por cima para ver quantas.',
   'settingsPanel.theme.schedule': 'Agendado',
   'settingsPanel.label.darkFrom': 'Escuro das',
   'settingsPanel.label.darkUntil': 'Até',

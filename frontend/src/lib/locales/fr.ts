@@ -1445,6 +1445,8 @@ const fr: Record<string, string> = {
   'settingsPanel.hint.handCursor': 'Affiche le curseur main sur les boutons, les lignes et les onglets au lieu de la flèche habituelle. Les liens gardent toujours la main.',
   'settingsPanel.toggle.dockBadge': 'Nombre de non lus sur l\'icône du Dock',
   'settingsPanel.hint.dockBadge': 'Affiche sur l\'icône de l\'application dans le Dock le nombre de messages non lus dans la boîte de réception.',
+  'settingsPanel.toggle.trayBadge': 'Pastille de non lus sur l\'icône de la zone de notification',
+  'settingsPanel.hint.trayBadge': 'Ajoute une pastille à l\'icône de la zone de notification tant que la boîte de réception contient des messages non lus. Survolez l\'icône pour voir leur nombre.',
   'settingsPanel.theme.schedule': 'Programmé',
   'settingsPanel.label.darkFrom': 'Sombre à partir de',
   'settingsPanel.label.darkUntil': 'Jusqu\'à',

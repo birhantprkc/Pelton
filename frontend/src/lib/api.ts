@@ -1193,9 +1193,10 @@ export function titleBarDoubleClick(): void {
   void App.TitleBarDoubleClick()
 }
 
-// setDockBadge puts the unread count on the dock icon. No-op off macOS.
-export function setDockBadge(unread: number): void {
-  void App.SetDockBadge(unread)
+// setUnreadBadge puts the unread count on the dock icon on macOS, and the unread
+// dot on the tray icon on Windows and Linux.
+export function setUnreadBadge(unread: number): void {
+  void App.SetUnreadBadge(unread)
 }
 
 // setWindowTheme matches the native window chrome (the Windows caption bar) to
@@ -1305,7 +1306,7 @@ export const SettingKeys = {
   timeFormat: 'time_format',
   reduceMotion: 'reduce_motion',
   handCursor: 'hand_cursor',
-  dockBadge: 'dock_badge',
+  unreadBadge: 'dock_badge',
   themeDarkStart: 'theme_dark_start',
   themeDarkEnd: 'theme_dark_end',
   bodyFont: 'body_font',

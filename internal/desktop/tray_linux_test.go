@@ -3,11 +3,13 @@
 package desktop
 
 import (
+	"bufio"
 	"bytes"
-	"encoding/binary"
 	"image"
 	"image/color"
 	"image/png"
+	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/godbus/dbus/v5"
@@ -70,42 +72,12 @@ func TestTrayMenuLayout(t *testing.T) {
 	}
 }
 
-// buildICO packs frames into an .ico container; a frame that is not png is
-// stored as-is, standing in for a Windows bitmap frame.
-func buildICO(frames ...[]byte) []byte {
-	var b bytes.Buffer
-	binary.Write(&b, binary.LittleEndian, []uint16{0, 1, uint16(len(frames))})
-	offset := 6 + 16*len(frames)
-	for _, f := range frames {
-		b.Write([]byte{0, 0, 0, 0})
-		binary.Write(&b, binary.LittleEndian, []uint16{1, 32})
-		binary.Write(&b, binary.LittleEndian, []uint32{uint32(len(f)), uint32(offset)})
-		offset += len(f)
-	}
-	for _, f := range frames {
-		b.Write(f)
-	}
-	return b.Bytes()
-}
-
-func TestPixmapsFromICO(t *testing.T) {
+func TestPixmapFromImage(t *testing.T) {
 	img := image.NewNRGBA(image.Rect(0, 0, 2, 1))
 	img.SetNRGBA(0, 0, color.NRGBA{R: 0x11, G: 0x22, B: 0x33, A: 0xff})
 	img.SetNRGBA(1, 0, color.NRGBA{R: 0x40, G: 0x80, B: 0xc0, A: 0x80})
-	var frame bytes.Buffer
-	if err := png.Encode(&frame, img); err != nil {
-		t.Fatal(err)
-	}
-	bitmap := []byte("BM not a png frame")
 
-	pixmaps, err := pixmapsFromICO(buildICO(bitmap, frame.Bytes(), frame.Bytes()))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(pixmaps) != 2 {
-		t.Fatalf("got %d pixmaps, want the 2 png frames", len(pixmaps))
-	}
-	pm := pixmaps[0]
+	pm := pixmapFromImage(img)
 	if pm.Width != 2 || pm.Height != 1 {
 		t.Errorf("size = %dx%d, want 2x1", pm.Width, pm.Height)
 	}
@@ -115,20 +87,15 @@ func TestPixmapsFromICO(t *testing.T) {
 	if !bytes.Equal(pm.Data, want) {
 		t.Errorf("data = % x, want % x", pm.Data, want)
 	}
+}
 
-	bad := []struct {
-		name string
-		data []byte
-	}{
-		{"garbage", []byte("not an icon")},
-		{"only bitmap frames", buildICO(bitmap)},
-		{"frame past the end", buildICO(frame.Bytes())[:40]},
-		{"corrupt png frame", buildICO(append(append([]byte{}, pngMagic...), "junk"...))},
+func TestTrayToolTip(t *testing.T) {
+	sni := &statusNotifier{app: newApp("test", ""), title: "Pelton"}
+	if got := sni.toolTip(0); got.Title != "Pelton" || got.Description != "" {
+		t.Errorf("toolTip(0) = %+v, want the title alone", got)
 	}
-	for _, tt := range bad {
-		if _, err := pixmapsFromICO(tt.data); err == nil {
-			t.Errorf("%s decoded without error", tt.name)
-		}
+	if got := sni.toolTip(3); got.Title != "Pelton" || got.Description != "Unread: 3" {
+		t.Errorf("toolTip(3) = %+v, want the title over \"Unread: 3\"", got)
 	}
 }
 
@@ -161,5 +128,119 @@ func TestActivationTokenFollowsBusOrder(t *testing.T) {
 	sni.observe(&dbus.Message{Type: dbus.TypeSignal, Body: []interface{}{"kwin-3"}})
 	if got := sni.takeToken(); got != "" {
 		t.Errorf("takeToken() = %q after unrelated messages, want none", got)
+	}
+}
+
+// privateBus starts a dbus-daemon of its own for the test, so nothing reaches
+// the session bus of whoever runs it, and returns its address.
+func privateBus(t *testing.T) string {
+	t.Helper()
+	if _, err := exec.LookPath("dbus-daemon"); err != nil {
+		t.Skip("no dbus-daemon to run a private bus on")
+	}
+	cmd := exec.Command("dbus-daemon", "--session", "--nofork", "--print-address")
+	out, err := cmd.StdoutPipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = cmd.Process.Kill()
+		_ = cmd.Wait()
+	})
+	addr, err := bufio.NewReader(out).ReadString('\n')
+	if err != nil {
+		t.Fatalf("read bus address: %v", err)
+	}
+	return strings.TrimSpace(addr)
+}
+
+// TestSetUnreadRestoresPlainIcon reads the icon back the way a tray host does.
+// prop stores a new value into the old one in place, which once wrote the
+// dotted icon over the plain one, so clearing the count kept the dot.
+func TestSetUnreadRestoresPlainIcon(t *testing.T) {
+	addr := privateBus(t)
+	dial := func() *dbus.Conn {
+		conn, err := dbus.Connect(addr)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() { conn.Close() })
+		return conn
+	}
+
+	var frames [][]byte
+	for _, size := range []int{16, 32} {
+		img := image.NewNRGBA(image.Rect(0, 0, size, size))
+		for i := range img.Pix {
+			img.Pix[i] = 0xff
+		}
+		var b bytes.Buffer
+		if err := png.Encode(&b, img); err != nil {
+			t.Fatal(err)
+		}
+		frames = append(frames, b.Bytes())
+	}
+	a := newApp("test", "")
+	a.trayIcon = buildICO(frames...)
+	sni := &statusNotifier{app: a, conn: dial()}
+	if err := sni.export(); err != nil {
+		t.Fatal(err)
+	}
+	plain := append([]sniPixmap{}, sni.icon...)
+
+	host := dial().Object(sni.conn.Names()[0], sniPath)
+	read := func() ([]sniPixmap, sniToolTip) {
+		t.Helper()
+		var icon []sniPixmap
+		var tip sniToolTip
+		if err := host.StoreProperty(sniInterface+".IconPixmap", &icon); err != nil {
+			t.Fatal(err)
+		}
+		if err := host.StoreProperty(sniInterface+".ToolTip", &tip); err != nil {
+			t.Fatal(err)
+		}
+		return icon, tip
+	}
+	same := func(a, b []sniPixmap) bool {
+		if len(a) != len(b) {
+			return false
+		}
+		for i := range a {
+			if a[i].Width != b[i].Width || !bytes.Equal(a[i].Data, b[i].Data) {
+				return false
+			}
+		}
+		return true
+	}
+
+	steps := []struct {
+		count int
+		dot   bool
+		desc  string
+	}{
+		{3, true, "Unread: 3"},
+		{0, false, ""},
+		{5, true, "Unread: 5"},
+		{0, false, ""},
+	}
+	for _, step := range steps {
+		sni.setUnread(step.count)
+		icon, tip := read()
+		want := plain
+		if step.dot {
+			want = sni.dotted
+		}
+		if !same(icon, want) {
+			t.Errorf("setUnread(%d): host sees the wrong icon, want dot %v", step.count, step.dot)
+		}
+		if tip.Description != step.desc {
+			t.Errorf("setUnread(%d): tooltip %q, want %q", step.count, tip.Description, step.desc)
+		}
+	}
+	if same(plain, sni.dotted) {
+		t.Error("the plain and dotted icons are identical")
 	}
 }

@@ -1445,6 +1445,8 @@ const en: Record<string, string> = {
   'settingsPanel.hint.handCursor': 'Shows the hand pointer over buttons, rows and tabs instead of the normal arrow. Links always keep the hand.',
   'settingsPanel.toggle.dockBadge': 'Unread count on the dock icon',
   'settingsPanel.hint.dockBadge': 'Shows how many unread messages your inbox holds, on the app icon in the dock.',
+  'settingsPanel.toggle.trayBadge': 'Unread dot on the tray icon',
+  'settingsPanel.hint.trayBadge': 'Marks the tray icon with a dot while your inbox holds unread messages. Hover the icon for the count.',
   'settingsPanel.theme.schedule': 'Scheduled',
   'settingsPanel.label.darkFrom': 'Dark from',
   'settingsPanel.label.darkUntil': 'Until',

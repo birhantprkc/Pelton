@@ -650,10 +650,6 @@ export function SetDefaultMailClient() {
   return window['go']['desktop']['App']['SetDefaultMailClient']();
 }
 
-export function SetDockBadge(arg1) {
-  return window['go']['desktop']['App']['SetDockBadge'](arg1);
-}
-
 export function SetFlagColor(arg1, arg2) {
   return window['go']['desktop']['App']['SetFlagColor'](arg1, arg2);
 }
@@ -704,6 +700,10 @@ export function SetSeen(arg1, arg2) {
 
 export function SetSetting(arg1, arg2) {
   return window['go']['desktop']['App']['SetSetting'](arg1, arg2);
+}
+
+export function SetUnreadBadge(arg1) {
+  return window['go']['desktop']['App']['SetUnreadBadge'](arg1);
 }
 
 export function SetVirusTotalAPIKey(arg1) {

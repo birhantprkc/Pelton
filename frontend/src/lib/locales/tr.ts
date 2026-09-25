@@ -1445,6 +1445,8 @@ const tr: Record<string, string> = {
   'settingsPanel.hint.handCursor': 'Düğmelerin, satırların ve sekmelerin üzerinde normal ok yerine el işaretçisini gösterir. Bağlantılar her zaman eli korur.',
   'settingsPanel.toggle.dockBadge': 'Dock simgesinde okunmamış sayısı',
   'settingsPanel.hint.dockBadge': "Gelen kutunuzun kaç okunmamış ileti tuttuğunu, dock'taki uygulama simgesinde gösterir.",
+  'settingsPanel.toggle.trayBadge': 'Sistem tepsisi simgesinde okunmamış noktası',
+  'settingsPanel.hint.trayBadge': 'Gelen kutunuzda okunmamış ileti olduğu sürece sistem tepsisi simgesine bir nokta koyar. Sayıyı görmek için simgenin üzerine gelin.',
   'settingsPanel.theme.schedule': 'Zamanlanmış',
   'settingsPanel.label.darkFrom': 'Koyu başlangıç',
   'settingsPanel.label.darkUntil': 'Bitiş',

@@ -1445,6 +1445,8 @@ const nl: Record<string, string> = {
   'settingsPanel.hint.handCursor': 'Toont de handcursor boven knoppen, rijen en tabbladen in plaats van de gewone pijl. Links houden altijd de hand.',
   'settingsPanel.toggle.dockBadge': 'Aantal ongelezen op het Dock-pictogram',
   'settingsPanel.hint.dockBadge': 'Toont op het app-pictogram in het Dock hoeveel ongelezen berichten in je postvak IN staan.',
+  'settingsPanel.toggle.trayBadge': 'Stip voor ongelezen op het systeemvakpictogram',
+  'settingsPanel.hint.trayBadge': 'Zet een stip op het pictogram in het systeemvak zolang je postvak IN ongelezen berichten bevat. Beweeg erover voor het aantal.',
   'settingsPanel.theme.schedule': 'Gepland',
   'settingsPanel.label.darkFrom': 'Donker vanaf',
   'settingsPanel.label.darkUntil': 'Tot',

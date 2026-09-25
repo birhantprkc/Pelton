@@ -50,7 +50,7 @@
     setMessageFontSize,
     setToastPosition,
     setNotifyNewMail,
-    setDockBadgeEnabled,
+    setUnreadBadgeEnabled,
     setPaneLocked,
     setSendDelay,
     setFlagHighlight,
@@ -1378,9 +1378,9 @@
           <div class="toggle">
             <span class="row-label">{$t(badgeToggleKey)}</span>
             <ToggleSwitch
-              checked={$prefs.dockBadge}
+              checked={$prefs.unreadBadge}
               label={$t(badgeToggleKey)}
-              on:change={(e) => setDockBadgeEnabled(e.detail)}
+              on:change={(e) => setUnreadBadgeEnabled(e.detail)}
             />
           </div>
           <p class="hint">{$t(badgeHintKey)}</p>

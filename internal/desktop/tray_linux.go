@@ -130,7 +130,7 @@ func (a *App) startTray() {
 	}
 	tray.Store(t)
 	// the frontend may have reported a count before the item was up.
-	a.applyDockBadge()
+	a.applyUnreadBadge()
 
 	// hosts learn about items only through RegisterStatusNotifierItem, so a
 	// host that (re)appears has to be told again.

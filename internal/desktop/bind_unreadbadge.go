@@ -1,27 +1,27 @@
 package desktop
 
-// SetDockBadge puts the unread count on the dock icon, or the unread dot on
+// SetUnreadBadge puts the unread count on the dock icon, or the unread dot on
 // the tray icon on Windows and Linux. The frontend calls it
 // whenever the unified inbox count changes, which already covers syncing, marking
 // read and deleting, so there is no second count to keep in step here.
 //
-// A no-op anywhere with neither; see dockbadge_other.go.
-func (a *App) SetDockBadge(unread int) {
+// A no-op anywhere with neither; see unreadbadge_other.go.
+func (a *App) SetUnreadBadge(unread int) {
 	if unread < 0 {
 		unread = 0
 	}
 	a.badgeMu.Lock()
 	a.unreadBadge = unread
 	a.badgeMu.Unlock()
-	a.applyDockBadge()
+	a.applyUnreadBadge()
 }
 
-// applyDockBadge pushes the remembered count to the platform, or clears the
+// applyUnreadBadge pushes the remembered count to the platform, or clears the
 // badge when the setting is off. Also called when that setting changes, so
 // turning it back on does not wait for the next sidebar refresh. The lock is
 // held through the push so two calls racing cannot land an older count last.
-func (a *App) applyDockBadge() {
-	enabled := a.boolSetting(settingDockBadge, true)
+func (a *App) applyUnreadBadge() {
+	enabled := a.boolSetting(settingUnreadBadge, true)
 
 	a.badgeMu.Lock()
 	defer a.badgeMu.Unlock()

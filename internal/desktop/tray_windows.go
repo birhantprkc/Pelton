@@ -63,7 +63,7 @@ func (a *App) trayReady() {
 	}
 	trayUp.Store(true)
 	// the frontend may have reported a count before the loop was up.
-	a.applyDockBadge()
+	a.applyUnreadBadge()
 }
 
 // setPlatformBadge shows the unread dot on the tray icon, with the count in

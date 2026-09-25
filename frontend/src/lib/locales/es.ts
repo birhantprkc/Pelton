@@ -1445,6 +1445,8 @@ const es: Record<string, string> = {
   'settingsPanel.hint.handCursor': 'Muestra el cursor de mano sobre botones, filas y pestañas en lugar de la flecha normal. Los enlaces siempre conservan la mano.',
   'settingsPanel.toggle.dockBadge': 'Número de no leídos en el icono del Dock',
   'settingsPanel.hint.dockBadge': 'Muestra en el icono de la aplicación en el Dock cuántos mensajes sin leer hay en la bandeja de entrada.',
+  'settingsPanel.toggle.trayBadge': 'Punto de no leídos en el icono de la bandeja del sistema',
+  'settingsPanel.hint.trayBadge': 'Marca el icono de la bandeja del sistema con un punto mientras haya mensajes sin leer en la bandeja de entrada. Pasa el cursor por encima para ver cuántos.',
   'settingsPanel.theme.schedule': 'Programado',
   'settingsPanel.label.darkFrom': 'Oscuro desde',
   'settingsPanel.label.darkUntil': 'Hasta',

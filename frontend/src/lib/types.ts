@@ -518,7 +518,8 @@ export interface UIPrefs {
   // handCursor shows the browser hand over clickable chrome instead of the
   // native arrow. Hyperlinks keep the hand regardless.
   handCursor: boolean
-  // dockBadge shows the unread count on the dock icon (macOS only for now).
+  // dockBadge shows the unread count on the dock icon on macOS, or the unread
+  // dot on the tray icon on Windows and Linux.
   dockBadge: boolean
   // themeDarkStart/themeDarkEnd bound the dark window ("HH:MM") for the
   // schedule theme mode.

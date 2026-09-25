@@ -1,9 +1,8 @@
-//go:build !darwin
+//go:build !darwin && !windows && !linux
 
 package desktop
 
-// Only macOS has a dock tile to badge. Windows wants a taskbar overlay icon
-// through ITaskbarList3, which needs COM and an icon rendered per count, and
-// Linux has no convention that works across desktops; both are their own
-// problem rather than a stub away.
-func setPlatformBadge(_ int) {}
+// Only macOS has a dock tile to badge, and only Windows and Linux have a tray
+// icon to dot (see tray_windows.go and tray_linux.go); anywhere else there is
+// nothing to show the count on.
+func (a *App) setPlatformBadge(_ int) {}

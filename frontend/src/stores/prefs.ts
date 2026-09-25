@@ -494,7 +494,7 @@ export function setHandCursor(value: boolean): void {
   void setSetting(SettingKeys.handCursor, String(value))
 }
 
-// setDockBadgeEnabled toggles the unread count on the dock icon. The backend
+// setDockBadgeEnabled toggles the unread badge on the dock or tray icon. The backend
 // re-applies or clears the badge itself when this setting lands.
 export function setDockBadgeEnabled(value: boolean): void {
   prefs.update((p) => ({ ...p, dockBadge: value }))

@@ -1453,6 +1453,8 @@ const it: Record<string, string> = {
     'settingsPanel.hint.handCursor': 'Mostra il puntatore a mano su pulsanti, righe e schede anziché la normale freccia. I link mantengono sempre la mano.',
     'settingsPanel.toggle.dockBadge': 'Conteggio dei messaggi non letti sull\'icona del Dock',
     'settingsPanel.hint.dockBadge': 'Mostra quanti messaggi non letti contiene la posta in arrivo sull\'icona dell\'app nel Dock.',
+    'settingsPanel.toggle.trayBadge': 'Punto dei non letti sull\'icona dell\'area di notifica',
+    'settingsPanel.hint.trayBadge': 'Segna l\'icona nell\'area di notifica con un punto finché la posta in arrivo contiene messaggi non letti. Passaci sopra con il mouse per vederne il numero.',
     'settingsPanel.theme.schedule': 'Programmato',
     'settingsPanel.label.darkFrom': 'Modalità scura dalle',
     'settingsPanel.label.darkUntil': 'Alle',

@@ -34,7 +34,7 @@ import (
 const badgeCap = 999
 
 // setPlatformBadge puts the unread count on the dock tile. Zero clears it.
-func setPlatformBadge(count int) {
+func (a *App) setPlatformBadge(count int) {
 	label := ""
 	switch {
 	case count > badgeCap:

@@ -116,7 +116,8 @@ const (
 	// show the browser hand over clickable chrome instead of the native arrow.
 	// hyperlinks keep the hand either way.
 	settingHandCursor = "hand_cursor"
-	// show the unread count on the dock icon (macOS only for now).
+	// show the unread count on the dock icon on macOS, or the unread dot on
+	// the tray icon on Windows and Linux.
 	settingDockBadge = "dock_badge"
 	// dark window bounds ("HH:MM") for the schedule theme mode.
 	settingThemeDarkStart = "theme_dark_start"
@@ -361,7 +362,8 @@ type UIPrefsDTO struct {
 	// HandCursor shows the browser hand over clickable chrome instead of the
 	// native arrow.
 	HandCursor bool `json:"handCursor"`
-	// DockBadge shows the unread count on the dock icon.
+	// DockBadge shows the unread count on the dock icon on macOS, or the unread
+	// dot on the tray icon on Windows and Linux.
 	DockBadge bool `json:"dockBadge"`
 	// ThemeDarkStart/ThemeDarkEnd bound the dark window ("HH:MM") for the
 	// schedule theme mode.
@@ -539,7 +541,7 @@ func (a *App) SetSetting(key, value string) error {
 	if key == settingCharsetFallback {
 		a.applyCharsetFallback()
 	}
-	if key == settingDockBadge {
+	if key == settingDockBadge || key == settingLanguage {
 		a.applyDockBadge()
 	}
 	if key == settingIndexDecrypted {

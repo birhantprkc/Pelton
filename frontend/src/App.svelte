@@ -207,7 +207,7 @@
   // open; keep them greyed in step with the open message.
   $: setMailActionsEnabled($visibleMessageId != null)
 
-  // the dock badge follows the unified inbox, which the sidebar already
+  // the dock or tray badge follows the unified inbox, which the sidebar already
   // recomputes after a sync and after anything that changes read state, so
   // there is no second count to keep in step.
   $: setDockBadge($sidebar.data?.views?.find((v) => v.key === 'inbox')?.unreadCount ?? 0)

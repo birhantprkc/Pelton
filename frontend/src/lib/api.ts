@@ -1193,7 +1193,8 @@ export function titleBarDoubleClick(): void {
   void App.TitleBarDoubleClick()
 }
 
-// setDockBadge puts the unread count on the dock icon. No-op off macOS.
+// setDockBadge puts the unread count on the dock icon on macOS, and the unread
+// dot on the tray icon on Windows and Linux.
 export function setDockBadge(unread: number): void {
   void App.SetDockBadge(unread)
 }

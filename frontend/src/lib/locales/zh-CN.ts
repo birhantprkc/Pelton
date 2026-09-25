@@ -1446,6 +1446,8 @@ const zhCN: Record<string, string> = {
   'settingsPanel.hint.handCursor': '在按钮、列表行和标签页上显示手型指针，而非普通箭头。链接始终使用手型。',
   'settingsPanel.toggle.dockBadge': '程序坞图标上的未读计数',
   'settingsPanel.hint.dockBadge': '在程序坞的应用图标上显示收件箱中的未读邮件数。',
+  'settingsPanel.toggle.trayBadge': '系统托盘图标上的未读圆点',
+  'settingsPanel.hint.trayBadge': '收件箱中有未读邮件时，在系统托盘图标上显示一个圆点。将指针悬停在图标上可查看数量。',
   'settingsPanel.theme.schedule': '定时切换',
   'settingsPanel.label.darkFrom': '深色开始于',
   'settingsPanel.label.darkUntil': '结束于',

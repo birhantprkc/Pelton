@@ -2,7 +2,11 @@
 
 package desktop
 
-import "github.com/energye/systray"
+import (
+	"runtime"
+
+	"github.com/energye/systray"
+)
 
 // The notification-area icon is served by systray, whose Windows backend is
 // plain win32 syscalls: no cgo, no network.
@@ -11,7 +15,12 @@ import "github.com/energye/systray"
 // inside its message loop, so it runs in a goroutine for the app's lifetime;
 // stopTray ends it at shutdown.
 func (a *App) startTray() {
-	goSafe("the notification area icon", func() { systray.Run(a.trayReady, nil) })
+	goSafe("the notification area icon", func() {
+		// win32 delivers a window's messages only to the thread that created
+		// it, so the goroutine must not move off that thread mid-loop.
+		runtime.LockOSThread()
+		systray.Run(a.trayReady, nil)
+	})
 }
 
 // stopTray removes the tray icon. Safe to call even if the tray never came up.

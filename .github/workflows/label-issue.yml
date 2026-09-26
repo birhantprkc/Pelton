@@ -52,6 +52,11 @@ jobs:
           DISPATCH_ISSUE: ${{ inputs.issue }}
         with:
           script: |
+            // the organisation's Priority issue field. Re-derive it with
+            // `gh api orgs/peltonapp/issue-fields` if the field is ever
+            // recreated.
+            const PRIORITY_FIELD_ID = 46380040
+
             // the event payload carries the issue on an issues event; a manual
             // run names it instead, so both paths end up fetching the same
             // fields and the rest of the job does not care which fired.
@@ -77,11 +82,18 @@ jobs:
               return
             }
 
+            // Priority is an organisation issue field rather than a label, so
+            // an existing value is read from the field values, not from labels.
+            const prioritised = (data.issue_field_values ?? []).some(
+              (v) => v.issue_field_id === PRIORITY_FIELD_ID && v.value != null,
+            )
+
             core.setOutput('skip', 'false')
             core.setOutput('number', String(number))
             core.setOutput('title', data.title ?? '')
             core.setOutput('body', data.body ?? '')
             core.setOutput('typed', data.type ? 'true' : 'false')
+            core.setOutput('prioritised', prioritised ? 'true' : 'false')
             core.setOutput('labels', JSON.stringify(data.labels.map((l) => l.name)))
 
       - id: infer
@@ -142,7 +154,7 @@ jobs:
                       },
                       priority: {
                         type: "string",
-                        enum: ["priority: critical", "priority: high", "priority: medium", "priority: low"]
+                        enum: ["Urgent", "High", "Medium", "Low"]
                       },
                       type: {
                         type: "string",
@@ -178,12 +190,16 @@ jobs:
           ISSUE_TYPE: ${{ steps.infer.outputs.type }}
           NUMBER: ${{ steps.issue.outputs.number }}
           TYPED: ${{ steps.issue.outputs.typed }}
+          PRIORITISED: ${{ steps.issue.outputs.prioritised }}
           LABELS: ${{ steps.issue.outputs.labels }}
         with:
           script: |
-            // labels this workflow owns. bug, enhancement and needs-triage are
-            // set by the issue templates and belong to them, so they are left
-            // alone here.
+            const PRIORITY_FIELD_ID = 46380040
+
+            // the only labels this workflow owns. bug, enhancement and
+            // needs-triage are set by the issue templates and belong to them,
+            // and priority is a field rather than a label, so neither is
+            // touched here.
             const AREAS = [
               'area: backend',
               'area: frontend',
@@ -191,15 +207,9 @@ jobs:
               'area: packaging',
               'area: ci',
             ]
-            const PRIORITIES = [
-              'priority: critical',
-              'priority: high',
-              'priority: medium',
-              'priority: low',
-            ]
-            const managed = new Set([...AREAS, ...PRIORITIES])
+            const managed = new Set(AREAS)
 
-            const desired = new Set([process.env.PRIORITY])
+            const desired = new Set()
             if (process.env.AREA !== 'none') desired.add(process.env.AREA)
 
             const current = new Set(JSON.parse(process.env.LABELS))
@@ -218,16 +228,30 @@ jobs:
               })
             }
 
-            // the templates set the type for issues opened through them. Only
-            // an issue that still has none is typed here, so a deliberate
-            // choice is never overwritten.
+            // the templates set the type for issues opened through them, and a
+            // maintainer triaging an issue sets its priority. Only a value that
+            // is still empty is filled in here, so a deliberate choice is never
+            // overwritten.
             const typed = process.env.TYPED === 'true'
-            if (!typed) {
-              await github.rest.issues.update({ ...ref, type: process.env.ISSUE_TYPE })
+            const prioritised = process.env.PRIORITISED === 'true'
+
+            const update = {}
+            if (!typed) update.type = process.env.ISSUE_TYPE
+            if (!prioritised) {
+              update.issue_field_values = [
+                { field_id: PRIORITY_FIELD_ID, value: process.env.PRIORITY },
+              ]
+            }
+            if (Object.keys(update).length) {
+              await github.request('PATCH /repos/{owner}/{repo}/issues/{issue_number}', {
+                ...ref,
+                ...update,
+              })
             }
 
-            core.summary.addHeading(`Labels for #${ref.issue_number}`, 3)
-            core.summary.addRaw(`Added: ${toAdd.join(', ') || 'none'}\n\n`)
-            core.summary.addRaw(`Removed: ${toRemove.join(', ') || 'none'}\n\n`)
-            core.summary.addRaw(`Type: ${typed ? 'kept the existing one' : process.env.ISSUE_TYPE}\n`)
+            core.summary.addHeading(`Triage for #${ref.issue_number}`, 3)
+            core.summary.addRaw(`Labels added: ${toAdd.join(', ') || 'none'}\n\n`)
+            core.summary.addRaw(`Labels removed: ${toRemove.join(', ') || 'none'}\n\n`)
+            core.summary.addRaw(`Type: ${typed ? 'kept the existing one' : process.env.ISSUE_TYPE}\n\n`)
+            core.summary.addRaw(`Priority: ${prioritised ? 'kept the existing one' : process.env.PRIORITY}\n`)
             await core.summary.write()

@@ -1,6 +1,7 @@
 name: Localization issue
 description: Missing, incorrect, or untranslated text in Pelton
 labels: ["area: localization", "needs-triage"]
+type: Bug
 body:
   - type: dropdown
     id: language

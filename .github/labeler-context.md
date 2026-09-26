@@ -68,6 +68,26 @@ Judge by what happens to the user, not by how upset the report sounds.
 
 If the report is vague and you cannot tell, choose `Medium`.
 
+## What the efforts mean
+
+Estimate the work to do it, not how much it matters. Priority and effort are
+independent: a one-line fix can be urgent, and a nice-to-have can be huge.
+
+- **Low** — a contained change in one place: wording, a colour or spacing fix,
+  a missing translation, a guard on one condition, a new setting that toggles
+  something that already exists.
+
+- **Medium** — real work inside one area: a new component or settings panel, a
+  bug whose fix spans a few files in one Go package, a new keyboard shortcut
+  with its own state.
+
+- **High** — the change crosses the Go and Svelte sides, alters the database
+  schema or a stored format so existing installs need migrating, adds a
+  protocol or provider integration, or touches sync, crypto or credentials.
+  Anything that needs a design decision before it can be written.
+
+If you cannot tell from the report, choose `Medium`.
+
 ## What the types mean
 
 - **Bug** — something behaves other than it should.

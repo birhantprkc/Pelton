@@ -49,23 +49,44 @@ gets `none`. Do not force a guess.
 
 ## What the priorities mean
 
+These are the options of the organisation's Priority field, not labels.
+
 Judge by what happens to the user, not by how upset the report sounds.
 
-- **priority: critical** — mail or data is lost or destroyed, the app cannot
-  start at all, credentials or message contents are exposed, or a security
-  flaw is described. Anything where waiting makes the damage worse.
+- **Urgent** — mail or data is lost or destroyed, the app cannot start at all,
+  credentials or message contents are exposed, or a security flaw is
+  described. Anything where waiting makes the damage worse.
 
-- **priority: high** — a core job is broken with no workaround: cannot send,
-  cannot receive, sync fails, an account cannot be added, the app crashes in
-  normal use.
+- **High** — a core job is broken with no workaround: cannot send, cannot
+  receive, sync fails, an account cannot be added, the app crashes in normal
+  use.
 
-- **priority: medium** — something is broken but there is a way around it, or
-  it affects part of the app rather than its core. Most feature requests land
-  here.
+- **Medium** — something is broken but there is a way around it, or it affects
+  part of the app rather than its core. Most feature requests land here.
 
-- **priority: low** — cosmetic, wording, a nice-to-have, or a rare edge case.
+- **Low** — cosmetic, wording, a nice-to-have, or a rare edge case.
 
-If the report is vague and you cannot tell, choose `priority: medium`.
+If the report is vague and you cannot tell, choose `Medium`.
+
+## What the efforts mean
+
+Estimate the work to do it, not how much it matters. Priority and effort are
+independent: a one-line fix can be urgent, and a nice-to-have can be huge.
+
+- **Low** — a contained change in one place: wording, a colour or spacing fix,
+  a missing translation, a guard on one condition, a new setting that toggles
+  something that already exists.
+
+- **Medium** — real work inside one area: a new component or settings panel, a
+  bug whose fix spans a few files in one Go package, a new keyboard shortcut
+  with its own state.
+
+- **High** — the change crosses the Go and Svelte sides, alters the database
+  schema or a stored format so existing installs need migrating, adds a
+  protocol or provider integration, or touches sync, crypto or credentials.
+  Anything that needs a design decision before it can be written.
+
+If you cannot tell from the report, choose `Medium`.
 
 ## What the types mean
 

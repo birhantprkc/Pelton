@@ -44,8 +44,12 @@ a backup tool.
 - **area: ci** — GitHub Actions workflows themselves. Rare for user-reported
   issues; mostly maintainer-facing.
 
+Choose every area the issue touches. Most issues have exactly one. A feature
+that needs work on both the Go side and the interface gets both, and that is
+common for anything user-visible with state behind it.
+
 An issue that fits none of these, or that is a question rather than a report,
-gets `none`. Do not force a guess.
+gets an empty list. Do not force a guess.
 
 ## What the priorities mean
 

@@ -154,8 +154,12 @@ jobs:
                     required: ["area", "priority", "effort", "type"],
                     properties: {
                       area: {
-                        type: "string",
-                        enum: ["area: backend", "area: frontend", "area: localization", "area: packaging", "area: ci", "none"]
+                        type: "array",
+                        description: "every area the issue touches; empty when none fit",
+                        items: {
+                          type: "string",
+                          enum: ["area: backend", "area: frontend", "area: localization", "area: packaging", "area: ci"]
+                        }
                       },
                       priority: {
                         type: "string",
@@ -185,7 +189,7 @@ jobs:
           echo "model returned: $result"
 
           {
-            echo "area=$(printf '%s' "$result" | jq -r .area)"
+            echo "areas=$(printf '%s' "$result" | jq -c '.area')"
             echo "priority=$(printf '%s' "$result" | jq -r .priority)"
             echo "effort=$(printf '%s' "$result" | jq -r .effort)"
             echo "type=$(printf '%s' "$result" | jq -r .type)"
@@ -195,7 +199,7 @@ jobs:
         if: steps.infer.outcome == 'success' && steps.infer.outputs.priority != ''
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         env:
-          AREA: ${{ steps.infer.outputs.area }}
+          AREAS: ${{ steps.infer.outputs.areas }}
           PRIORITY: ${{ steps.infer.outputs.priority }}
           ISSUE_TYPE: ${{ steps.infer.outputs.type }}
           NUMBER: ${{ steps.issue.outputs.number }}
@@ -222,8 +226,10 @@ jobs:
             ]
             const managed = new Set(AREAS)
 
-            const desired = new Set()
-            if (process.env.AREA !== 'none') desired.add(process.env.AREA)
+            // an issue can touch more than one area, so this is a list. An
+            // empty one means none fit, and any area label already on the
+            // issue is then removed.
+            const desired = new Set(JSON.parse(process.env.AREAS))
 
             const current = new Set(JSON.parse(process.env.LABELS))
             const toAdd = [...desired].filter((l) => !current.has(l))

@@ -28,10 +28,6 @@ concurrency:
 jobs:
   label:
     runs-on: ubuntu-latest
-    # the secrets context cannot be read from a step's `if`, so the key is
-    # hoisted here and the guard below tests env instead.
-    env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,13 +36,22 @@ jobs:
 
       - id: infer
         name: Ask the model for an area, priority and type
-        if: ${{ env.OPENAI_API_KEY != '' }}
         env:
+          # the key is scoped to this one step, so no other step in the job,
+          # including checkout and github-script, can read it.
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           # the title and body reach the script as data, never as shell text.
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
           set -euo pipefail
+
+          # no key configured, or a fork's event that carries no secrets: leave
+          # the issue on needs-triage rather than failing.
+          if [ -z "${OPENAI_API_KEY:-}" ]; then
+            echo "OPENAI_API_KEY is not set; skipping inference."
+            exit 0
+          fi
 
           context=$(cat .github/labeler-context.md)
 

@@ -10,47 +10,95 @@ name: Label issues
 # is untrusted, and a prompt injection in a body can therefore do no more than
 # push the choice to a different valid label.
 #
+# Runs when an issue is opened or edited, and on demand for any issue number,
+# which is how existing issues get classified:
+#
+#     gh workflow run "Label issues" -f issue=425
+#
 # Without OPENAI_API_KEY set, the inference step is skipped and the issue keeps
 # needs-triage. Nothing here fails a build.
 
 on:
   issues:
     types: [opened, edited]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: Issue number to classify
+        required: true
+        type: string
 
 permissions:
   contents: read
   issues: write
 
 concurrency:
-  group: label-issue-${{ github.event.issue.number }}
+  group: label-issue-${{ github.event.issue.number || inputs.issue }}
   cancel-in-progress: true
 
 jobs:
   label:
     runs-on: ubuntu-latest
-    # a closed issue is not worth spending a call on, which also means editing
-    # spam after it has been closed costs nothing.
-    if: github.event.issue.state == 'open'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           sparse-checkout: .github/labeler-context.md
           sparse-checkout-cone-mode: false
 
+      - id: issue
+        name: Read the issue
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          DISPATCH_ISSUE: ${{ inputs.issue }}
+        with:
+          script: |
+            // the event payload carries the issue on an issues event; a manual
+            // run names it instead, so both paths end up fetching the same
+            // fields and the rest of the job does not care which fired.
+            const number = context.payload.issue?.number ?? Number(process.env.DISPATCH_ISSUE)
+            if (!Number.isInteger(number)) {
+              core.setFailed('no issue number to work on')
+              return
+            }
+
+            const { data } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: number,
+            })
+
+            // a closed issue is not worth spending a call on, which also means
+            // editing spam after it has been closed costs nothing. The issues
+            // API also answers for pull requests, which have their own
+            // workflow.
+            if (data.state !== 'open' || data.pull_request) {
+              core.info(`#${number} is closed or is a pull request; nothing to do`)
+              core.setOutput('skip', 'true')
+              return
+            }
+
+            core.setOutput('skip', 'false')
+            core.setOutput('number', String(number))
+            core.setOutput('title', data.title ?? '')
+            core.setOutput('body', data.body ?? '')
+            core.setOutput('typed', data.type ? 'true' : 'false')
+            core.setOutput('labels', JSON.stringify(data.labels.map((l) => l.name)))
+
       - id: infer
         name: Ask the model for an area, priority and type
+        if: steps.issue.outputs.skip == 'false'
         env:
           # the key is scoped to this one step, so no other step in the job,
           # including checkout and github-script, can read it.
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           # the title and body reach the script as data, never as shell text.
-          ISSUE_TITLE: ${{ github.event.issue.title }}
-          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_TITLE: ${{ steps.issue.outputs.title }}
+          ISSUE_BODY: ${{ steps.issue.outputs.body }}
         run: |
           set -euo pipefail
 
-          # no key configured, or a fork's event that carries no secrets: leave
-          # the issue on needs-triage rather than failing.
+          # no key configured, or an event that carries no secrets: leave the
+          # issue on needs-triage rather than failing.
           if [ -z "${OPENAI_API_KEY:-}" ]; then
             echo "OPENAI_API_KEY is not set; skipping inference."
             exit 0
@@ -122,16 +170,17 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Apply the labels and the type
-        if: ${{ steps.infer.outcome == 'success' && steps.infer.outputs.priority != '' }}
+        if: steps.infer.outcome == 'success' && steps.infer.outputs.priority != ''
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         env:
           AREA: ${{ steps.infer.outputs.area }}
           PRIORITY: ${{ steps.infer.outputs.priority }}
           ISSUE_TYPE: ${{ steps.infer.outputs.type }}
+          NUMBER: ${{ steps.issue.outputs.number }}
+          TYPED: ${{ steps.issue.outputs.typed }}
+          LABELS: ${{ steps.issue.outputs.labels }}
         with:
           script: |
-            const issue = context.payload.issue
-
             // labels this workflow owns. bug, enhancement and needs-triage are
             // set by the issue templates and belong to them, so they are left
             // alone here.
@@ -153,14 +202,14 @@ jobs:
             const desired = new Set([process.env.PRIORITY])
             if (process.env.AREA !== 'none') desired.add(process.env.AREA)
 
-            const current = new Set(issue.labels.map((l) => l.name))
+            const current = new Set(JSON.parse(process.env.LABELS))
             const toAdd = [...desired].filter((l) => !current.has(l))
             const toRemove = [...current].filter((l) => managed.has(l) && !desired.has(l))
 
             const ref = {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: issue.number,
+              issue_number: Number(process.env.NUMBER),
             }
             if (toAdd.length) await github.rest.issues.addLabels({ ...ref, labels: toAdd })
             for (const name of toRemove) {
@@ -172,12 +221,13 @@ jobs:
             // the templates set the type for issues opened through them. Only
             // an issue that still has none is typed here, so a deliberate
             // choice is never overwritten.
-            if (!issue.type) {
+            const typed = process.env.TYPED === 'true'
+            if (!typed) {
               await github.rest.issues.update({ ...ref, type: process.env.ISSUE_TYPE })
             }
 
-            core.summary.addHeading('Issue labels', 3)
+            core.summary.addHeading(`Labels for #${ref.issue_number}`, 3)
             core.summary.addRaw(`Added: ${toAdd.join(', ') || 'none'}\n\n`)
             core.summary.addRaw(`Removed: ${toRemove.join(', ') || 'none'}\n\n`)
-            core.summary.addRaw(`Type: ${issue.type ? `kept ${issue.type.name}` : process.env.ISSUE_TYPE}\n`)
+            core.summary.addRaw(`Type: ${typed ? 'kept the existing one' : process.env.ISSUE_TYPE}\n`)
             await core.summary.write()

@@ -1,6 +1,7 @@
 name: Packaging / installation issue
 description: Trouble installing, updating, or uninstalling Pelton (dnf, Copr, Windows installer, macOS .dmg, etc.)
 labels: ["area: packaging", "needs-triage"]
+type: Bug
 body:
   - type: textarea
     id: description
